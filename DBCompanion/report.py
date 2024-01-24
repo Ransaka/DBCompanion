@@ -1,3 +1,4 @@
+import os
 from .step import Step
 from utils.db_utils import detect_database_schema, get_engine
 from utils.code_utils import HidePrints,in_notebook
@@ -17,7 +18,7 @@ class Report:
     def __init__(
             self,
             name:str,
-            save_location:str,
+            save_directory:str,
             api_key:str,
             start_instructions:str=None,
             database_instructions:str=None,
@@ -26,10 +27,11 @@ class Report:
     ) -> None:
 
         self.__check_name(name)
+        self.__check_dir_permission()
         self.name = name
         self.steps:list[Step] = []
         self.instruction = {}
-        self.save_location = save_location
+        self.save_directory = save_directory
         self.n_steps = 0
         self.oai_client = OpenAI(api_key=api_key)
         # setting instructions
@@ -52,6 +54,7 @@ class Report:
 
     def add_source_database(self, username, password, port, host, database, tables=None):
         self.connection = get_engine(host=host, username=username, password=password, database=database, port=port)
+        self.connection.ping()
         self.database_schema = detect_database_schema(connecton=self.connection, database=database, tables_to_lookup=tables)
         self.__connection_params = {
             'username':username,
@@ -76,6 +79,18 @@ class Report:
     def __check_name(name):
         if "." in name:
             raise ValueError(f"Name should not contain periods(.)")
+    
+    @staticmethod
+    def __check_dir_permission():
+        # Check read and write permissions
+        path = os.getcwd()
+        read_permission = os.access(path, os.R_OK)
+        write_permission = os.access(path, os.W_OK)
+
+        if read_permission and write_permission:
+            pass
+        else:
+            raise PermissionError(f"{path}")
         
     @staticmethod
     def __check_instructions(instruction_type):
@@ -100,20 +115,26 @@ class Report:
         self.steps.append(
             Step(instruction=self.system_prompt,query=query, id=self.n_steps+1)
         )
-        self.n_steps+=1
+        self.n_steps += 1
     
+    @staticmethod
+    def __create_directory(directory_path):
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+
     def compile_report(self, force_execute_steps=True):
         if not force_execute_steps:
             raise NotImplementedError("force_execute_steps=False functionality not yet implemented")
         
         # with HidePrints():
-        self.report_path = f"{self.save_location}/{self.name}.md"
+        self.__create_directory(self.save_directory)
+        self.report_path = f"{self.save_directory}/{self.name}.md"
         with open(self.report_path,'w') as f:
             f.write(f"<h1>{self.name: ^100}</h1>\n")
             for step in tqdm(self.steps,total=self.n_steps, desc='Compiling report... '):
                 step.compile(
                     connection_param_dict=self.__connection_params,
-                    save_location=self.save_location,
+                    save_location=self.save_directory,
                     client=self.oai_client,
                     execute=force_execute_steps
                 )
