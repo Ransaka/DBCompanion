@@ -1,0 +1,6 @@
+openai==1.8.0
+pandas==1.5.3
+pymysql==1.4.6
+markdown==3.5.2
+tqdm==4.66.1
+pdfkit==1.0.0

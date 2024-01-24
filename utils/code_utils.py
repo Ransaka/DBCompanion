@@ -24,7 +24,7 @@ if is_numeric(result) and not isinstance(result,(pd.DataFrame,pd.Series)):
 elif result is None or isinstance(result,plt.Figure) or isinstance(result, ModuleType):
     plt.savefig("{save_location}/{function_name}.png")
     plt.close()
-    print("{save_location}/{function_name}.png")
+    print("./{function_name}.png") # saving inside the save_location but printing only function name
 elif isinstance(result,(pd.DataFrame,pd.Series)):
     print(result.to_html())
 else:
