@@ -1,5 +1,5 @@
 [project]
-name = "bdcompanion"
+name = "dbcompanion"
 version = "0.0.1"
 description = "Talk with your database"
 authors = [
