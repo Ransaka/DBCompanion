@@ -5,7 +5,7 @@ from .utils.code_utils import HidePrints,in_notebook
 from openai import OpenAI
 import markdown
 from tqdm import tqdm
-from utils.prompt import (
+from .utils.prompt import (
     DATABASE_PROMPT_CATEGORY_NAME,
     DEFAULT_INSTRUCTION_MAP,
     DATABASE_PROMPT_PREFIX,
