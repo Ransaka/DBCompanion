@@ -1,6 +1,6 @@
 [project]
 name = "dbcompanion"
-version = "0.0.5"
+version = "0.0.6"
 description = "Talk with your database"
 authors = [
     { name = "Ransaka", email = "ransaka.ravihara@gmail.com" }
@@ -9,7 +9,7 @@ dependencies = [
     "openai",
     "pydantic>=2",
     "pydantic-settings>=2",
-    "pymysql>=1.4.6",
+    "pymysql>=1.1.0",
     "markdown>=3.5.2",
     "tqdm>=4.66.1",
     "pandas>=1.5.1"
