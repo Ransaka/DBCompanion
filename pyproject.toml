@@ -1,6 +1,6 @@
 [project]
 name = "dbcompanion"
-version = "0.0.4"
+version = "0.0.5"
 description = "Talk with your database"
 authors = [
     { name = "Ransaka", email = "ransaka.ravihara@gmail.com" }
