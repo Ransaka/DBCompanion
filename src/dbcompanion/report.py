@@ -1,10 +1,10 @@
 import os
+import markdown
+from tqdm import tqdm
+from openai import OpenAI
 from .step import Step
 from .utils.db_utils import detect_database_schema, get_engine
 from .utils.code_utils import HidePrints,in_notebook
-from openai import OpenAI
-import markdown
-from tqdm import tqdm
 from .utils.prompt import (
     DATABASE_PROMPT_CATEGORY_NAME,
     DEFAULT_INSTRUCTION_MAP,
@@ -51,6 +51,7 @@ class Report:
             instruction_type=DATABASE_PROMPT_CATEGORY_NAME,
             instruction=database_instructions
         )
+        self.compiled = False
 
     def add_source_database(self, username, password, port, host, database, tables=None):
         self.connection = get_engine(host=host, username=username, password=password, database=database, port=port)
@@ -122,22 +123,19 @@ class Report:
         if not os.path.exists(directory_path):
             os.makedirs(directory_path)
 
-    def compile_report(self, force_execute_steps=True):
-        if not force_execute_steps:
-            raise NotImplementedError("force_execute_steps=False functionality not yet implemented")
-        
+    def compile_report(self):        
         # with HidePrints():
         self.__create_directory(self.save_directory)
         self.report_path = f"{self.save_directory}/{self.name}.md"
         with open(self.report_path,'w') as f:
             f.write(f"<h1>{self.name: ^100}</h1>\n")
             for step in tqdm(self.steps,total=self.n_steps, desc='Compiling report... '):
-                step.compile(
-                    connection_param_dict=self.__connection_params,
-                    save_location=self.save_directory,
-                    client=self.oai_client,
-                    execute=force_execute_steps
-                )
+                if not step.compiled:
+                    step.compile(
+                        connection_param_dict=self.__connection_params,
+                        save_location=self.save_directory,
+                        client=self.oai_client
+                    )
                 f.write(f"<h3>{step.id} - {step.title}</h3>\n")
                 if step.meta['return_type']=='plot':
                     f.write(f"<img src='{step.meta['details']}'>\n")
@@ -145,7 +143,27 @@ class Report:
                     f.write(f"{step.meta['details']}\n")
                 else:
                     f.write(f"<p>{step.meta['details']}</p>\n")
+            self.compiled = True
     
     def save_as_html(self):
+        if not self.compiled:
+            self.compile_report()
         report_path_html = self.report_path.replace(".md",".html")
         markdown.markdownFromFile(input=self.report_path, output=report_path_html)
+    
+    def get_connection_params(self):
+        if hasattr(self,'connection'):
+            return self.__connection_params
+        else:
+            raise ValueError("Connection parameters not properly configured, set connection using `add_source_database`")
+
+    def add_to_report(self,step:Step):
+        step.id = self.n_steps+1
+        self.steps.append(step)
+        self.n_steps+=1
+    
+    def remove_from_report(self,id:int):
+        title = self.steps[id].title
+        self.steps.pop(id)
+        self.n_steps -= 1
+        print(f"{title} removed from report")
