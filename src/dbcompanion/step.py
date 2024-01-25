@@ -1,5 +1,5 @@
-from utils.oai_utils import get_gpt_response
-from utils.code_utils import get_executable_code,get_execution_output
+from .utils.oai_utils import get_gpt_response
+from .utils.code_utils import get_executable_code,get_execution_output
 from openai import Client
 
 class Step:

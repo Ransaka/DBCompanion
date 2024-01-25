@@ -9,6 +9,10 @@ dependencies = [
     "openai",
     "pydantic>=2",
     "pydantic-settings>=2",
+    "pymysql>=1.4.6",
+    "markdown>=3.5.2",
+    "tqdm>=4.66.1",
+    "pandas>=1.5.1"
 ]
 license = { file = "LICENSE" }
 readme = "README.md"

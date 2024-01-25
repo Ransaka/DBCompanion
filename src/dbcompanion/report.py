@@ -1,7 +1,7 @@
 import os
 from .step import Step
-from utils.db_utils import detect_database_schema, get_engine
-from utils.code_utils import HidePrints,in_notebook
+from .utils.db_utils import detect_database_schema, get_engine
+from .utils.code_utils import HidePrints,in_notebook
 from openai import OpenAI
 import markdown
 from tqdm import tqdm
